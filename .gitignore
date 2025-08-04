@@ -53,3 +53,6 @@ CMakeFiles/
 *.vcxproj
 *.vcxproj.filters
 *.sln
+
+# Visual Studio Code workspace storage
+.vscode/
