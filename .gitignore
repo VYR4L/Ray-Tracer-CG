@@ -39,3 +39,17 @@
 
 # debug information files
 *.dwo
+
+# Build directory
+/build/
+
+# Output image
+image.ppm
+
+# CMake generated files (if not using /build/)
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles/
+*.vcxproj
+*.vcxproj.filters
+*.sln
