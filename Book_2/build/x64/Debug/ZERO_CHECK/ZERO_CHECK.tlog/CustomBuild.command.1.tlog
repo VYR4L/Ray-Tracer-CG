@@ -1,0 +1,10 @@
+^C:\USERS\FKZZA\DOCUMENTS\PROGRAMMING\UNIOESTE\CG\RAY-TRACER-CG\BOOK_2\BUILD\CMAKEFILES\8623542FACC113AD38B6890E6F3E528A\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/fkzza/Documents/Programming/Unioeste/CG/Ray-Tracer-CG/Book_2 -BC:/Users/fkzza/Documents/Programming/Unioeste/CG/Ray-Tracer-CG/Book_2/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/fkzza/Documents/Programming/Unioeste/CG/Ray-Tracer-CG/Book_2/build/RayTracerCG.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
