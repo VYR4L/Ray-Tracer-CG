@@ -21,6 +21,9 @@ int main()
     auto mat2 = make_shared<metal>(color(0.7, 0.7, 0.9), 0.1);
     auto mat3 = make_shared<wood>(color(0.6, 0.4, 0.2), color(0.3, 0.2, 0.1), 12.0);
 
+    // Chão de madeira
+    world.add(make_shared<box>(point3(-4.0, -1.1, -4.0), point3(4.0, -1.0, 4.0), mat3));
+
     // Objetos
     world.add(make_shared<sphere>(point3(-2.0, 0.5, -1.0), 0.5, mat1_red)); // Esfera pequena
     world.add(make_shared<sphere>(point3(1.5, 1.0, 0.5), 1.0, mat2));   // Esfera grande
@@ -46,15 +49,17 @@ int main()
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
 
-    cam.samples_per_pixel = 100;
+    cam.samples_per_pixel = 500;
     cam.max_depth = 50;
 
     cam.vfov = 50;
 
-    cam.lookfrom = point3(2, 3, 6);
-    cam.lookat = point3(0, 0, 0);
-    cam.vup = vec3(0, 1, 0);
+    // Vista frontal
+    // cam.lookfrom = point3(2, 3, 6);
+    // cam.lookat = point3(0, 0, 0);
+    // cam.vup = vec3(0, 1, 0);
 
+    // Lateral esquerda
     // cam.lookfrom = point3(-6, 2, 0);
     // cam.lookat = point3(0, 0, 0);
     // cam.vup = vec3(0, 1, 0);

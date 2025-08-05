@@ -12,6 +12,18 @@ This project is an assignment for the Computer Graphics class. It implements and
   - 5 different viewports
   - 3 original materials (to be implemented after the main source code)
 
+## Differences between this and the original implementation
+- Camera rendering uses parallelism to increase performance and decrase compile time
+- For all books:
+  - Lambertian now has color gradient based on Y position.
+  - Metal has procedural dyeing and variable roughness depending on the position.
+- For Book 1:
+  - Added new material: Wood
+- For Book 2:
+  - Added new material: suede
+- For Book 3:
+  - Added new material: ceramic
+
 ## Goals
 
 - Understand and apply fundamental ray tracing concepts

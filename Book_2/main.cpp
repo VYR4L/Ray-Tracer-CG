@@ -9,8 +9,84 @@
 #include "texture.h"
 #include "quad.h"
 #include "constant_medium.h"
+#include "box.h"
 
 using namespace std;
+
+void custom_scene() {
+    hittable_list world;
+
+    // Materiais
+    auto suede_mat = make_shared<suede>(color(0.7, 0.4, 0.3), 0.7);
+    auto metal_mat = make_shared<metal>(color(0.3, 0.7, 0.9), 0.05);
+    auto perlin_tex = make_shared<noise_texture>(4);
+    auto perlin_mat = make_shared<lambertian>(perlin_tex);
+    auto light_mat = make_shared<diffuse_light>(color(18, 18, 18));
+    auto red = make_shared<lambertian>(color(.65, .05, .05));
+    auto white = make_shared<lambertian>(color(.73, .73, .73));
+    auto green = make_shared<lambertian>(color(.12, .45, .15));
+
+    // Cornell Box
+    world.add(make_shared<quad>(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green)); // esquerda
+    world.add(make_shared<quad>(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red)); // direita
+    world.add(make_shared<quad>(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light_mat)); // luz superior
+    world.add(make_shared<quad>(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white)); // chão
+    world.add(make_shared<quad>(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white)); // teto
+    world.add(make_shared<quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white)); // fundo
+
+    // Objetos internos
+    for (int a = -1; a <= 1; a++) {
+        for (int b = -1; b <= 1; b++) {
+            auto choose_mat = random_double();
+            point3 center(278 + a*60, 60, 278 + b*60);
+            if (choose_mat < 0.5) {
+                world.add(make_shared<sphere>(center, 40, metal_mat));
+            } else {
+                world.add(make_shared<sphere>(center, 40, suede_mat));
+            }
+        }
+    }
+
+    // Perlin sphere central
+    world.add(make_shared<sphere>(point3(278, 180, 278), 50, perlin_mat));
+
+    camera cam;
+    cam.aspect_ratio      = 1.0;
+    cam.image_width       = 600;
+    cam.samples_per_pixel = 200;
+    cam.max_depth         = 50;
+    cam.background        = color(0,0,0);
+
+    cam.vfov     = 40;
+    // cam.lookfrom = point3(278, 278, -800);
+    // cam.lookat   = point3(278, 278, 0);
+    // cam.vup      = vec3(0,1,0);
+
+    // POV 2: Lateral esquerda
+    // cam.lookfrom = point3(50, 278, -800);
+    // cam.lookat   = point3(278, 278, 0);
+    // cam.vup      = vec3(0,1,0);
+
+    // POV 3: Lateral direita
+    // cam.lookfrom = point3(500, 278, -800);
+    // cam.lookat   = point3(278, 278, 0);
+    // cam.vup      = vec3(0,1,0);
+
+    // POV 4: Vista superior
+    // cam.lookfrom = point3(278, 500, -800);
+    // cam.lookat   = point3(278, 278, 0);
+    // cam.vup      = vec3(0,0,-1);
+
+    // POV 5: Diagonal superior
+    cam.lookfrom = point3(500, 500, -500);
+    cam.lookat   = point3(278, 278, 0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+    cam.focus_dist    = 10.0;
+
+    cam.render(world);
+}
 
 void bouncing_spheres() {
     hittable_list world;
@@ -383,7 +459,7 @@ void final_scene(int image_width, int samples_per_pixel, int max_depth) {
 }
 
 int main() {
-    switch (9) {
+    switch (10) {
         case 1:  bouncing_spheres();          break;
         case 2:  checkered_spheres();         break;
         case 3:  earth();                     break;
@@ -393,6 +469,7 @@ int main() {
         case 7:  cornell_box();               break;
         case 8:  cornell_smoke();             break;
         case 9:  final_scene(800, 10000, 40); break;
+        case 10: custom_scene();              break;
         default: final_scene(400,   250,  4); break;
     }
 }

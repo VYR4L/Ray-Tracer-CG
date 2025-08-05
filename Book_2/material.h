@@ -1,4 +1,3 @@
-
  #ifndef MATERIAL_H
  #define MATERIAL_H
 
@@ -35,13 +34,12 @@ public:
         const override
     {
         auto scatter_direction = rec.normal + random_unit_vector();
-
-        // Catch degenerate scatter direction
-        if (scatter_direction.near_zero())
-            scatter_direction = rec.normal;
-
+        if (scatter_direction.near_zero()) scatter_direction = rec.normal;
         scattered = ray(rec.p, scatter_direction);
-        attenuation = tex->value(rec.u, rec.v, rec.p);
+        // Gradiente de cor baseado na posição Y
+        double t = 0.5 * (rec.p.y() + 1.0) / 100.0;
+        color grad = tex->value(rec.u, rec.v, rec.p) * (1.0 - t) + color(0.2, 0.5, 0.8) * t;
+        attenuation = grad;
         return true;
     }
 
@@ -57,11 +55,13 @@ public:
     bool scatter(const ray &r_in, const hit_record &rec, color &attenuation, ray &scattered)
         const override
     {
+        // Tintura procedural: cor varia com X
+        color tint = albedo * (0.7 + 0.3 * std::sin(rec.p.x() * 0.05));
+        double local_fuzz = fuzz * (0.5 + 0.5 * std::abs(std::sin(rec.p.z() * 0.1)));
         vec3 reflected = reflect(r_in.direction(), rec.normal);
-        reflected = unit_vector(reflected) + (fuzz * random_unit_vector());
+        reflected = unit_vector(reflected) + (local_fuzz * random_unit_vector());
         scattered = ray(rec.p, reflected, r_in.time());
-        attenuation = albedo;
-
+        attenuation = tint;
         return (dot(scattered.direction(), rec.normal) > 0);
     }
 
@@ -140,6 +140,27 @@ class isotropic : public material {
 
   private:
     std::shared_ptr<texture> tex;
+};
+
+class suede : public material {
+public:
+    suede(const color& base, double roughness = 0.5)
+        : base_color(base), roughness(roughness) {}
+
+    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override {
+        // Camurça: difuso com ruído procedural e rugosidade
+        auto scatter_direction = rec.normal + roughness * random_unit_vector();
+        if (scatter_direction.near_zero()) scatter_direction = rec.normal;
+        scattered = ray(rec.p, scatter_direction, r_in.time());
+        // Ruído simples baseado na posição
+        double noise = 0.7 + 0.3 * std::sin(rec.p.x() * 0.2 + rec.p.y() * 0.2 + rec.p.z() * 0.2);
+        double facing = std::max(0.0, dot(rec.normal, unit_vector(-r_in.direction())));
+        attenuation = base_color * noise * (0.7 + 0.3 * facing);
+        return true;
+    }
+private:
+    color base_color;
+    double roughness;
 };
 
 #endif

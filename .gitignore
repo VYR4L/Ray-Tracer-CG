@@ -44,7 +44,10 @@
 /build/
 
 # Output image
-image.ppm
+*.ppm
+
+# ZIP files
+*.zip
 
 # CMake generated files (if not using /build/)
 CMakeCache.txt
