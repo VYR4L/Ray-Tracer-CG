@@ -1,11 +1,11 @@
+
 #ifndef MATERIAL_H
 #define MATERIAL_H
-
 
 #include "hittable.h"
 #include "ray.h"
 #include "color.h"
-
+#include <cmath>
 
 class material {
   public:
@@ -18,22 +18,45 @@ class material {
     }
 };
 
+// Simple procedural wood material (brown with stripes)
+class wood : public material {
+public:
+    wood(const color& base, const color& stripe, double freq = 10.0)
+        : base_color(base), stripe_color(stripe), frequency(freq) {}
+
+    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override {
+        double pattern = std::sin(frequency * rec.p.x());
+        attenuation = (pattern > 0 ? base_color : stripe_color);
+        scattered = ray(rec.p, rec.normal + random_unit_vector());
+        return true;
+    }
+private:
+    color base_color, stripe_color;
+    double frequency;
+};
+
 class lambertian : public material {
   public:
     lambertian(const color& albedo) : albedo(albedo) {}
+    lambertian(const color& a, const color& b) : albedo(a), alt_color(b), use_gradient(true) {}
 
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered)
     const override {
         auto scatter_direction = rec.normal + random_unit_vector();
-
-        // Catch degenerate scatter direction
         if (scatter_direction.near_zero())
             scatter_direction = rec.normal;
-
         scattered = ray(rec.p, scatter_direction);
-        attenuation = albedo;
+        if (use_gradient) {
+            double t = 0.5 * (rec.normal.y() + 1.0);
+            attenuation = (1.0 - t) * albedo + t * alt_color;
+        } else {
+            attenuation = albedo;
+        }
         return true;
     }
+private:
+    color alt_color;
+    bool use_gradient = false;
 
   private:
     color albedo;
@@ -41,16 +64,19 @@ class lambertian : public material {
 
 class metal : public material {
   public:
-    metal(const color& albedo, double fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}
+    metal(const color& albedo, double fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1), tint(1.0, 1.0, 1.0) {}
+    metal(const color& albedo, double fuzz, const color& tint) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1), tint(tint) {}
 
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered)
     const override {
         vec3 reflected = reflect(r_in.direction(), rec.normal);
         reflected = unit_vector(reflected) + (fuzz * random_unit_vector());
         scattered = ray(rec.p, reflected);
-        attenuation = albedo;
+        attenuation = albedo * tint;
         return (dot(scattered.direction(), rec.normal) > 0);
     }
+private:
+    color tint;
 
   private:
     color albedo;
